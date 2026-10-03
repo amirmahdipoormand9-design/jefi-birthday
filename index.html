@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SURVIVOR FILE // 002</title>
+<meta name="description" content="A classified survivor database. Something is hidden inside it.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<h1 id="page-h1" class="visually-hidden">Project Jefi — a survivor file</h1>
+<div id="atmosphere" aria-hidden="true"></div>
+<div id="grain-overlay" aria-hidden="true"></div>
+
+<!-- SYSTEM HEADER — narrative chrome fades in ACT VII; the language
+     toggle deliberately stays available on every screen. -->
+<header id="system-header" class="system-header">
+  <span class="system-header__status">
+    <span id="status-dot" class="status-dot" aria-hidden="true"></span>
+    <span id="header-status-text">SECURE CHANNEL // REC</span>
+  </span>
+  <span class="system-header__controls">
+    <div class="lang-toggle" role="group" aria-label="Language / زبان">
+      <button id="lang-en" class="lang-toggle__btn" type="button" data-lang="en" aria-pressed="true">EN</button>
+      <span class="lang-toggle__sep" aria-hidden="true">|</span>
+      <button id="lang-fa" class="lang-toggle__btn" type="button" data-lang="fa" aria-pressed="false">فارسی</button>
+    </div>
+    <button id="mute-toggle" class="mute-toggle" type="button"></button>
+  </span>
+</header>
+
+<main id="app">
+
+  <!-- ================= ACT I — THE TRANSMISSION ================= -->
+  <section id="act-1" class="act" data-act="1" aria-label="Act I — The Transmission">
+    <div class="act__frame">
+      <div id="act1-body" class="body-text" aria-live="off"></div>
+      <button id="act1-cta" class="cta-button" type="button"></button>
+    </div>
+  </section>
+
+  <!-- ================= ACT II — SURVIVOR IDENTIFIED ================= -->
+  <section id="act-2" class="act act--left" data-act="2" hidden aria-label="Act II — Survivor Identified">
+    <div class="act__frame">
+      <div class="dossier">
+        <div class="dossier__photo-frame">
+          <img id="act2-keyart" class="dossier__keyart" src="assets/images/jefi-keyart-v01.jpg"
+               alt="Amir and Jefi standing side by side on a ruined street, survivor-file portrait."
+               decoding="async">
+        </div>
+        <div class="dossier__content">
+          <div class="dossier__header">
+            <span id="act2-label-title" class="system-label"></span>
+            <span class="system-label ltr-token">// <bdi dir="ltr">ID: 002</bdi></span>
+          </div>
+          <div id="act2-rows" class="dossier__rows"></div>
+        </div>
+      </div>
+      <button id="act2-cta" class="cta-button" type="button"></button>
+    </div>
+  </section>
+
+  <!-- ================= ACT III — THE MEMORY ARCHIVE (index) ================= -->
+  <section id="act-3" class="act act--left" data-act="3" hidden aria-label="Act III — The Memory Archive">
+    <div class="act__frame">
+      <h2 id="act3-heading" class="heading"></h2>
+      <p id="act3-sub" class="system-label"></p>
+      <ul id="archive-list" class="archive-list"></ul>
+      <p id="act3-prompt" class="metadata"></p>
+      <button id="act3-cta" class="cta-button" type="button" style="visibility:hidden;"></button>
+      <!-- Ground at the foot of the archive: a dead infected lies here. Optional easter egg,
+           in normal flow (never overlaps a control) and inside the scroll area. -->
+      <div class="act3-ground">
+        <button id="act3-infected-egg" class="infected-egg" type="button" aria-label="Something in the corner. Probably nothing.">
+          <svg class="infected-egg__art" viewBox="0 0 200 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="eggSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b978a"/><stop offset="1" stop-color="#55605a"/></linearGradient>
+              <linearGradient id="eggJacket" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d6753"/><stop offset="1" stop-color="#363d35"/></linearGradient>
+              <linearGradient id="eggPants" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a413d"/><stop offset="1" stop-color="#1c201e"/></linearGradient>
+              <radialGradient id="eggPool" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#4a1616" stop-opacity="0.95"/><stop offset="1" stop-color="#2a0d0d" stop-opacity="0"/></radialGradient>
+            </defs>
+            <!-- ground contact shadow, blood pool, a little rubble -->
+            <ellipse cx="102" cy="76" rx="92" ry="8" fill="#000" opacity="0.55"/>
+            <ellipse cx="58" cy="72" rx="40" ry="9" fill="url(#eggPool)"/>
+            <path d="M8 78 l7 -8 l9 2 l4 6 z M176 78 l6 -6 l10 1 l3 5 z" fill="#2b2f2e"/>
+            <path d="M150 79 l5 -4 l8 1 l2 3 z" fill="#3a3f3d"/>
+            <!-- legs, trailing to the right -->
+            <path d="M120 56 L176 60 L180 72 L122 70 Z" fill="url(#eggPants)"/>
+            <path d="M116 66 L170 74 L166 82 L114 76 Z" fill="url(#eggPants)"/>
+            <path d="M176 60 l15 2 l1 9 l-13 1 z" fill="#16191a"/>
+            <path d="M168 74 l16 3 l-1 6 l-14 -1 z" fill="#111415"/>
+            <!-- torso in a torn jacket, face-down and twisted -->
+            <path d="M60 52 Q86 38 124 50 L126 72 Q92 82 62 70 Z" fill="url(#eggJacket)"/>
+            <path d="M74 44 Q100 36 120 48" stroke="#4a5346" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M96 52 l8 8 l-5 9 M112 50 l4 10" stroke="#1f1c1b" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.7"/>
+            <path d="M88 60 q9 3 6 13 q-9 3 -13 -4 z" fill="#5a2222" opacity="0.9"/>
+            <path d="M108 62 q6 2 5 9 q-6 1 -9 -3 z" fill="#471c1c" opacity="0.85"/>
+            <!-- arm lying under the body -->
+            <path d="M104 52 Q116 40 128 44" stroke="#525b4d" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <!-- outstretched reaching arm + hand (this part twitches) -->
+            <g class="egg-hand">
+              <path d="M70 56 Q44 62 24 72" stroke="#59634f" stroke-width="10" fill="none" stroke-linecap="round"/>
+              <path d="M60 58 q-10 3 -18 8" stroke="#464e42" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+              <ellipse cx="19" cy="74" rx="8" ry="5.5" fill="url(#eggSkin)" transform="rotate(20 19 74)"/>
+              <path d="M12 71 l-7 -3 M12 74 l-8 0 M13 77 l-7 3 M15 69 l-4 -5" stroke="#6f7a6e" stroke-width="2" stroke-linecap="round"/>
+              <path d="M28 70 q3 3 1 7" stroke="#4a1f1f" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.85"/>
+            </g>
+            <!-- head -->
+            <g transform="rotate(-8 56 46)">
+              <ellipse cx="50" cy="46" rx="16" ry="14" fill="url(#eggSkin)"/>
+              <path d="M36 40 Q42 30 56 31 Q66 33 67 42 Q58 36 50 37 Q42 37 36 40 Z" fill="#221f1e"/>
+              <path d="M40 46 l7 3 M47 43 l-7 6" stroke="#131515" stroke-width="2" stroke-linecap="round"/>
+              <path d="M55 45 l6 3 M61 44 l-6 5" stroke="#131515" stroke-width="2" stroke-linecap="round"/>
+              <path d="M44 56 Q52 60 60 55" stroke="#1b1414" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+              <path d="M58 55 q3 6 1 12" stroke="#5c2626" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.85"/>
+            </g>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT IV — INCIDENT REPORTS (overlay) ================= -->
+  <div id="incident-view" class="incident-view" hidden role="dialog" aria-modal="true" aria-label="Incident report">
+    <button id="incident-back" class="incident-view__back" type="button">‹ ARCHIVE</button>
+    <div class="incident-view__body">
+      <div id="incident-icon" class="incident-view__icon"></div>
+      <h2 id="incident-title" class="system-label"></h2>
+      <p id="incident-body" class="body-text"></p>
+    </div>
+  </div>
+
+  <!-- ================= ACT V — THE LAST MISSION ================= -->
+  <section id="act-5" class="act" data-act="5" hidden aria-label="Act V — The Last Mission">
+    <div class="act__frame">
+      <p id="act5-label" class="system-label"></p>
+      <h2 id="act5-heading" class="heading"></h2>
+      <div style="width:100%; display:flex; flex-direction:column; gap:8px;">
+        <p id="act5-objective" class="mission-line"></p>
+        <p id="act5-difficulty" class="mission-line"></p>
+        <p id="act5-backup" class="mission-line mission-line--backup"><span class="backup-label"></span>&nbsp;<strong class="status-value"></strong></p>
+      </div>
+      <div class="progress-bar" role="img" aria-label="Mission readiness progress">
+        <div id="act5-fill" class="progress-bar__fill"></div>
+      </div>
+      <button id="act5-cta" class="cta-button" type="button"></button>
+    </div>
+  </section>
+
+  <!-- ================= ACT VI — SUPPLY DROP ================= -->
+  <section id="act-6" class="act" data-act="6" hidden aria-label="Act VI — Supply Drop">
+    <div id="act6-flash" class="crate__flash" aria-hidden="true"></div>
+    <div class="act__frame">
+      <h2 id="act6-heading" class="heading"></h2>
+
+      <div id="act6-stage" class="crate__stage">
+        <div class="crate__glow" aria-hidden="true"></div>
+        <div class="crate__shadow" aria-hidden="true"></div>
+        <div id="act6-crate" class="crate">
+          <div class="crate__inner" aria-hidden="true"></div>
+          <div class="crate__rays" aria-hidden="true"></div>
+          <div class="crate__half crate__half--top"></div>
+          <div class="crate__seam"></div>
+          <div class="crate__half crate__half--bottom"></div>
+        </div>
+
+        <!-- Optional encounter: an original infected blocks the crate.
+             ~5 taps drop it. Never required — the delivery button below
+             skips straight past it. -->
+        <div id="act6-foe-layer" class="foe">
+          <button id="act6-foe" class="foe__btn" type="button">
+            <span class="foe__pose">
+              <span class="foe__body">
+                <svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <defs>
+                    <linearGradient id="foeSkin" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#8a968a"/><stop offset="1" stop-color="#56625a"/>
+                    </linearGradient>
+                    <linearGradient id="foeShirt" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#5a6357"/><stop offset="1" stop-color="#363d36"/>
+                    </linearGradient>
+                    <linearGradient id="foeLegs" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#3a403c"/><stop offset="1" stop-color="#1d211f"/>
+                    </linearGradient>
+                    <radialGradient id="foeShade" cx="0.35" cy="0.25" r="0.9">
+                      <stop offset="0" stop-color="#fff" stop-opacity="0.10"/><stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="50" cy="194" rx="34" ry="4.5" fill="#000" opacity="0.5"/>
+                  <!-- legs -->
+                  <path d="M41 112 L37 188" stroke="url(#foeLegs)" stroke-width="15" stroke-linecap="round" fill="none"/>
+                  <path d="M60 112 L66 188" stroke="url(#foeLegs)" stroke-width="15" stroke-linecap="round" fill="none"/>
+                  <ellipse cx="35" cy="191" rx="10" ry="4" fill="#15181a"/>
+                  <ellipse cx="69" cy="191" rx="10" ry="4" fill="#15181a"/>
+                  <!-- far arm (hanging) -->
+                  <path d="M29 58 Q15 84 17 110 Q18 122 21 132" stroke="#4a5348" stroke-width="10" stroke-linecap="round" fill="none"/>
+                  <ellipse cx="21" cy="135" rx="5.5" ry="7" fill="url(#foeSkin)"/>
+                  <!-- torso, slumped and torn -->
+                  <path d="M28 54 Q50 44 74 54 L72 110 L66 114 L60 108 L52 116 L44 108 L36 115 L30 108 Z" fill="url(#foeShirt)"/>
+                  <path d="M28 54 Q50 44 74 54 L72 110 L66 114 L60 108 L52 116 L44 108 L36 115 L30 108 Z" fill="url(#foeShade)"/>
+                  <path d="M40 66 l6 8 l-3 9 M58 78 l7 6" stroke="#231f1d" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.7"/>
+                  <path d="M46 84 q6 4 4 12 q-6 2 -10 -4 z" fill="#5c2626" opacity="0.85"/>
+                  <path d="M62 96 q5 2 4 8 q-5 1 -7 -3 z" fill="#4a1f1f" opacity="0.8"/>
+                  <!-- near arm reaching -->
+                  <path d="M73 57 Q92 76 88 102 Q86 114 90 124" stroke="#525c50" stroke-width="10" stroke-linecap="round" fill="none"/>
+                  <ellipse cx="90" cy="128" rx="5.5" ry="7" fill="url(#foeSkin)" transform="rotate(-12 90 128)"/>
+                  <path d="M84 88 q4 3 3 9" stroke="#4a1f1f" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
+                  <!-- neck + head, tilted -->
+                  <path d="M46 46 L58 46 L57 56 L47 56 Z" fill="#6c786c"/>
+                  <g transform="rotate(-12 52 30)">
+                    <ellipse cx="52" cy="30" rx="13" ry="15.5" fill="url(#foeSkin)"/>
+                    <path d="M40 22 Q46 12 56 13 Q63 15 65 23 Q58 18 52 19 Q45 19 40 22 Z" fill="#232120"/>
+                    <ellipse cx="46.5" cy="29" rx="3.4" ry="4.2" fill="#131515"/>
+                    <ellipse cx="58" cy="29.5" rx="3.4" ry="4.2" fill="#131515"/>
+                    <circle cx="47" cy="29.5" r="0.9" fill="#c9a76a" opacity="0.55"/>
+                    <circle cx="58.4" cy="30" r="0.9" fill="#c9a76a" opacity="0.55"/>
+                    <path d="M46 40 Q52 44 58 40" stroke="#1a1414" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <path d="M57 38 q3 3 2 8" stroke="#5c2626" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.8"/>
+                  </g>
+                </svg>
+              </span>
+            </span>
+            <span class="foe__hitflash" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div id="act6-reticle" class="reticle" aria-hidden="true">
+          <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <circle cx="30" cy="30" r="17" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="30" cy="30" r="2" fill="currentColor"/>
+            <path d="M30 3v12M30 45v12M3 30h12M45 30h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div id="act6-dust" class="dust" aria-hidden="true"></div>
+
+        <button id="act6-egg" class="silhouette-egg" type="button" aria-label="An old survivor's silhouette, half-forgotten in the corner.">
+          <svg viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M20 6c-4 0-7 3-7 7v1.5c-2 .3-3.5 1.8-3.5 3.7 0 2 1.8 3.6 4 3.6h13c2.2 0 4-1.6 4-3.6 0-1.9-1.5-3.4-3.5-3.7V13c0-4-3-7-7-7z" fill="currentColor"/>
+            <path d="M9 17.5c0-1.2 1.3-2.3 3-2.6M31 17.5c0-1.2-1.3-2.3-3-2.6" stroke="currentColor" stroke-width="1"/>
+            <path d="M13 26c0-2.8 3.1-5 7-5s7 2.2 7 5v6l3 22H10l3-22v-6z" fill="currentColor" opacity="0.92"/>
+            <path d="M13 32l-5 9M27 32l5 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="act6-status" class="act6-status">
+        <p id="act6-hint" class="metadata" aria-live="polite"></p>
+        <div id="act6-pips" class="pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <div id="act6-reveal" class="supply-reveal">
+        <span id="act6-contents-label" class="supply-reveal__contents-label"></span>
+        <span id="act6-title" class="supply-reveal__title"></span>
+        <div id="act6-meta" class="supply-reveal__meta">
+          <span><span id="act6-recipient-label"></span>&nbsp;<span id="act6-recipient-value"></span></span>
+          <span><span id="act6-sender-label"></span>&nbsp;<span id="act6-sender-value"></span></span>
+        </div>
+      </div>
+
+      <button id="act6-cta" class="cta-button" type="button"></button>
+      <button id="act6-continue" class="cta-button cta-button--fill" type="button"></button>
+    </div>
+  </section>
+
+  <!-- ================= ACT VII — FINAL TRANSMISSION ================= -->
+  <section id="act-7" class="act act--warm" data-act="7" hidden aria-label="Act VII — Final Transmission">
+    <div class="act__frame">
+      <div id="act7-lines"></div>
+      <p id="act7-signature" class="warm-signature"></p>
+      <p id="act7-message" class="warm-message"></p>
+
+      <div id="act7-keepsake" class="keepsake">
+        <p id="keepsake-title" class="keepsake__title"></p>
+        <img id="keepsake-image" class="keepsake__image" src="assets/images/jefi_keepsake_final.jpg"
+             alt="A keepsake photo from the survivor archive." loading="lazy" decoding="async">
+        <p id="keepsake-caption" class="keepsake__caption"></p>
+        <a id="keepsake-save" class="cta-button cta-button--warm keepsake__save"
+           href="assets/images/jefi_keepsake_final.jpg" download="jefi_survivors_keepsake.jpg"></a>
+      </div>
+
+      <button id="act7-cta" class="cta-button cta-button--warm" type="button"></button>
+      <p id="act7-kept-note" class="metadata" aria-live="polite"></p>
+    </div>
+  </section>
+
+</main>
+
+<!-- Achievement / discovery toast (infected-body easter egg) -->
+<div id="toast" class="toast" hidden role="status" aria-live="polite">
+  <div class="toast__block">
+    <p id="toast-line1-title" class="toast__eyebrow"></p>
+    <p id="toast-line1-body" class="toast__body"></p>
+  </div>
+  <div class="toast__block">
+    <p id="toast-line2-title" class="toast__eyebrow toast__eyebrow--amber"></p>
+    <p id="toast-line2-body" class="toast__body"></p>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

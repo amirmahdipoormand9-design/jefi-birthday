@@ -1,0 +1,1748 @@
+/* ==========================================================================
+   PROJECT JEFI — styles.css
+   Source of truth: VISUAL_DESIGN_v1_0.md (§17 DESIGN TOKENS + component specs)
+   Enhancement pass: bilingual EN/FA + RTL, atmosphere/parallax, richer ACT VI
+   crate, keepsake block, infected-body easter egg, toast system.
+   Do not introduce colors/fonts/spacing outside the token system below.
+   ========================================================================== */
+
+/* -------------------------------------------------------------------------
+   1. FONTS
+   System role (Act I–VI, EN): JetBrains Mono. Personal role (Act VII, EN):
+   Fraunces. Persian (both registers): Vazirmatn — a true Persian-capable
+   variable font; there is no faithful Persian equivalent of a "terminal"
+   monospace, so per VISUAL_DESIGN_v1_0.md §16 we prioritize readability and
+   use weight/size (not a fake monospace) to keep the two registers distinct.
+   Loaded from Google Fonts for this prototype build. For production,
+   self-host these families (§16) for offline reliability.
+   ------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Vazirmatn:wght@400;500;600;700&display=swap');
+
+/* -------------------------------------------------------------------------
+   2. DESIGN TOKENS  (VISUAL_DESIGN_v1_0.md §17, verbatim)
+   ------------------------------------------------------------------------- */
+:root {
+  /* COLORS */
+  --bg-base: #0A0B0C;
+  --bg-elevated: #15181B;
+  --text-primary: #E8EAEC;
+  --text-secondary: #9AA1A5; /* lightened from #8B9296 to clear WCAG AA on --bg-base, per §13 */
+  --accent-amber: #D9A441;
+  --accent-amber-dim: #8A6A2C;
+  --status-green: #3FCB8C;
+  --status-green-dim: #245C44;
+  --locked-neutral: #6B7378;
+  --warning-red: #9C3B3B;
+  --warm-bg: #1C160F;
+  --warm-accent: #E0B37D;
+  --warm-text: #F2E9DD;
+
+  /* Tochal (IV.4) cold-blue exception, named locally — not a global token */
+  --tochal-blue: #3E5C76;
+
+  /* SPACING (8px base scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+
+  /* TYPOGRAPHY SCALE */
+  --font-system: "JetBrains Mono", ui-monospace, "Share Tech Mono", monospace;
+  --font-personal: "Fraunces", Georgia, "Noto Serif", serif;
+  --font-fa: "Vazirmatn", Tahoma, sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 26px;
+  --text-3xl: 28px;
+
+  /* BORDER RADIUS */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* BORDERS */
+  --border-hairline: 1px solid rgba(232, 234, 236, 0.12);
+  --border-cta: 1px solid var(--accent-amber);
+
+  /* SHADOWS */
+  --glow-cta: 0 0 12px rgba(217, 164, 65, 0.25);
+
+  /* OPACITY LEVELS */
+  --opacity-disabled: 0.4;
+  --opacity-dim: 0.6;
+  --opacity-full: 1;
+
+  /* MOTION TIMING */
+  --duration-instant: 150ms;
+  --duration-fast: 300ms;
+  --duration-medium: 500ms;
+  --duration-slow: 800ms;
+  --duration-warm-transition: 1000ms;
+  --easing-standard: ease-in-out;
+  --easing-out: ease-out;
+  --easing-glitch: steps(3, end);
+
+  /* Z-INDEX / LAYERS */
+  --z-atmosphere: -1;
+  --z-base: 0;
+  --z-content: 10;
+  --z-cta: 20;
+  --z-header: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+
+  color-scheme: dark;
+}
+
+/* -------------------------------------------------------------------------
+   3. RESET & BASE
+   ------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-system);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--duration-warm-transition) var(--easing-standard);
+}
+
+body.theme-warm {
+  background: var(--warm-bg);
+}
+
+button { font-family: inherit; }
+img { max-width: 100%; display: block; }
+
+a {
+  color: inherit;
+}
+
+/* visually-hidden but available to assistive tech (§13 screen-reader rule) */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -------------------------------------------------------------------------
+   3B. PERSIAN / RTL LANGUAGE LAYER
+   Setting dir="rtl" on <html> already flips flex row ordering, justify-
+   content, and text-align:start/end automatically per the CSS spec — most
+   of the layout below needs no manual mirroring. What genuinely needs
+   overriding: font family, letter-spacing (kills Persian glyph joining),
+   line-height (Persian needs more breathing room), and explicit `left`
+   values used for one-off aesthetic offsets (not layout).
+   ------------------------------------------------------------------------- */
+html[lang="fa"] body,
+body.lang-fa {
+  font-family: var(--font-fa);
+}
+body.lang-fa .heading,
+body.lang-fa .system-label,
+body.lang-fa .body-text,
+body.lang-fa .metadata,
+body.lang-fa .cta-button,
+body.lang-fa .archive-item__button,
+body.lang-fa .archive-item__status,
+body.lang-fa .status-indicator,
+body.lang-fa .classified-label,
+body.lang-fa .dossier__label,
+body.lang-fa .dossier__value,
+body.lang-fa .incident-view__back,
+body.lang-fa .mission-line,
+body.lang-fa .system-header,
+body.lang-fa .lang-toggle__btn,
+body.lang-fa .toast__eyebrow,
+body.lang-fa .toast__body,
+body.lang-fa .keepsake__title,
+body.lang-fa .keepsake__caption {
+  font-family: var(--font-fa);
+  /* letter-spacing disconnects Arabic-script joined letterforms */
+  letter-spacing: normal;
+}
+body.lang-fa .warm-signature,
+body.lang-fa .warm-message {
+  font-family: var(--font-fa);
+}
+/* keep the two-register distinction (system vs. personal) via weight/size
+   instead of a second typeface, since Vazirmatn serves both in Persian */
+body.lang-fa .warm-signature { font-weight: 500; font-style: normal; }
+body.lang-fa .warm-message { font-weight: 400; }
+body.lang-fa .body-text,
+body.lang-fa .warm-message { line-height: 1.9; }
+body.lang-fa .heading { line-height: 1.5; }
+
+/* Any Latin/technical run embedded in Persian prose (filenames, IDs, the
+   product name, tag-style values like RECIPIENT: JEFI) is isolated so the
+   bidi algorithm can't reorder its punctuation/digits or bleed direction
+   into the surrounding Persian. */
+bdi, .ltr-token {
+  unicode-bidi: isolate;
+  direction: ltr;
+  font-family: var(--font-system);
+  letter-spacing: 0;
+}
+body.lang-fa .archive-item__name bdi { font-family: var(--font-system); }
+
+/* -------------------------------------------------------------------------
+   4. GRAIN / NOISE OVERLAY
+   ------------------------------------------------------------------------- */
+#grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-repeat: repeat;
+}
+
+body.theme-warm #grain-overlay { opacity: 0.02; }
+
+/* -------------------------------------------------------------------------
+   4B. ATMOSPHERE LAYER — restrained environmental depth/haze/lighting
+   variation. Pure CSS gradients (no images, stays fast). A subtle 40s
+   drift + optional pointer parallax (JS, desktop-only, ≤8px) add "living"
+   depth without particles, glitch spam, or neon. Frozen under
+   reduced-motion (global override below handles the animation; the JS
+   parallax listener is simply never attached in that case).
+   ------------------------------------------------------------------------- */
+#atmosphere {
+  position: fixed;
+  inset: -10%;
+  z-index: var(--z-atmosphere);
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 60% 45% at 18% 12%, rgba(63, 203, 140, 0.06), transparent 60%),
+    radial-gradient(ellipse 55% 50% at 85% 78%, rgba(217, 164, 65, 0.05), transparent 65%),
+    radial-gradient(ellipse 80% 70% at 50% 100%, rgba(0, 0, 0, 0.55), transparent 70%);
+  animation: atmosphere-drift 42s ease-in-out infinite alternate;
+  transition: transform 0.6s ease-out;
+  will-change: transform;
+}
+body.theme-warm #atmosphere {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 25% 15%, rgba(224, 179, 125, 0.10), transparent 62%),
+    radial-gradient(ellipse 60% 55% at 80% 85%, rgba(224, 179, 125, 0.06), transparent 65%),
+    radial-gradient(ellipse 80% 70% at 50% 100%, rgba(0, 0, 0, 0.5), transparent 70%);
+}
+/* cinematic edge vignette + soft overhead key-light falloff, layered above
+   the atmosphere, below content — this is what gives the flat dark
+   background a sense of a lit foreground / dark midground / black
+   background separation without any 3D engine. */
+#app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 8%, rgba(255, 255, 255, 0.05), transparent 55%),
+    radial-gradient(ellipse 90% 80% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.4) 100%),
+    radial-gradient(ellipse 140% 100% at 50% 50%, transparent 70%, rgba(0, 0, 0, 0.3) 100%);
+}
+body.theme-warm #app::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 6%, rgba(224, 179, 125, 0.08), transparent 55%),
+    radial-gradient(ellipse 90% 80% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.35) 100%),
+    radial-gradient(ellipse 140% 100% at 50% 50%, transparent 70%, rgba(0, 0, 0, 0.25) 100%);
+}
+
+/* -------------------------------------------------------------------------
+   5. SYSTEM HEADER
+   ------------------------------------------------------------------------- */
+.system-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 44px;
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-3);
+  background: linear-gradient(to bottom, rgba(10,11,12,0.92), rgba(10,11,12,0));
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+body.theme-warm .system-header {
+  background: linear-gradient(to bottom, rgba(28,22,15,0.85), rgba(28,22,15,0));
+}
+
+.system-header__status,
+.system-header__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.system-header__status { min-width: 0; flex: 1 1 auto; white-space: nowrap; }
+.system-header__status > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.system-header__controls { flex: none; }
+@media (max-width: 400px) {
+  .system-header { padding: 0 var(--space-2); letter-spacing: 0.03em; }
+}
+
+/* Acts I–VI system chrome fades for the warm finale; the language toggle
+   deliberately does NOT — switching language must stay possible on every
+   screen, including ACT VII (spec: "switch behavior" §LANGUAGE SWITCH). */
+.system-header__status,
+.mute-toggle {
+  transition: opacity var(--duration-warm-transition) var(--easing-standard);
+}
+body.theme-warm .system-header__status,
+body.theme-warm .mute-toggle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 6px rgba(63, 203, 140, 0.7);
+  animation: pulse-idle 2s var(--easing-standard) infinite;
+  flex: none;
+}
+.status-dot--active { animation-duration: 0.9s; }
+
+.mute-toggle {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.mute-toggle:hover { color: var(--text-primary); }
+.mute-toggle svg { width: 18px; height: 18px; }
+
+/* Language toggle — always visible, always ≥44px tap target */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 44px;
+}
+.lang-toggle__btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  padding: 0 var(--space-2);
+  height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+body.lang-fa .lang-toggle__btn[data-lang="fa"] { font-family: var(--font-fa); font-size: var(--text-sm); }
+.lang-toggle__btn[data-lang="fa"] { font-family: var(--font-fa); font-size: var(--text-sm); }
+.lang-toggle__btn[aria-pressed="true"] {
+  color: var(--accent-amber);
+  font-weight: 700;
+}
+.lang-toggle__btn:hover { color: var(--text-primary); }
+.lang-toggle__sep { color: var(--text-secondary); opacity: 0.4; font-size: var(--text-xs); }
+body.theme-warm .lang-toggle__btn { color: var(--warm-text); opacity: 0.7; }
+body.theme-warm .lang-toggle__btn[aria-pressed="true"] { color: var(--warm-accent); opacity: 1; }
+body.theme-warm .lang-toggle__sep { color: var(--warm-text); }
+
+/* -------------------------------------------------------------------------
+   6. FOCUS STATES (§13: 2px cold-green ring, never just removed)
+   ------------------------------------------------------------------------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--status-green);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* -------------------------------------------------------------------------
+   7. ACT LAYOUT — "confined viewport frame", never full-bleed
+   ------------------------------------------------------------------------- */
+#app {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.act {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-3) var(--space-5);
+  background: var(--bg-base);
+  overflow-x: hidden; /* decorative glows must never create sideways scroll */
+  overflow-y: auto; /* allowed only as short-viewport fallback, §12 */
+}
+
+.act[hidden] { display: none; }
+
+.act__frame {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+/* logical properties: automatically mirror for [dir="rtl"], no override needed */
+.act--left .act__frame { align-items: flex-start; text-align: start; }
+
+@media (min-width: 768px) {
+  .act__frame { max-width: 480px; }
+}
+@media (min-width: 1024px) {
+  .act__frame { max-width: 600px; }
+}
+
+/* enter/exit transition states, driven by JS toggling classes */
+.act {
+  opacity: 1;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+.act.is-entering { opacity: 0; }
+.act.is-exiting { opacity: 0; }
+
+/* Act I -> II flicker: steps() easing, not a smooth fade */
+.act.is-flickering {
+  animation: flicker-cut 250ms var(--easing-glitch);
+}
+
+/* -------------------------------------------------------------------------
+   8. SYSTEM LABEL / HEADING / METADATA TYPE LEVELS
+   ------------------------------------------------------------------------- */
+.system-label {
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+body.lang-fa .system-label { text-transform: none; }
+
+.heading {
+  font-family: var(--font-system);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+@media (min-width: 768px) { .heading { font-size: var(--text-3xl); } }
+
+.body-text {
+  font-family: var(--font-system);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-line; /* preserve the storyboard's blank-line breaks */
+}
+@media (min-width: 768px) { .body-text { font-size: var(--text-lg); } }
+
+.metadata {
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* typewriter reveal spans — used for both per-character (EN) and
+   per-word (FA, to keep Arabic-script letter joining intact — splitting
+   Persian into single-character spans breaks cursive shaping) */
+.tw-line { display: block; }
+.tw-char {
+  opacity: 0;
+  animation: tw-in 1ms linear forwards;
+  animation-delay: calc(var(--i, 0) * 1ms);
+  white-space: pre-wrap;
+}
+.no-anim .tw-char { opacity: 1; animation: none; }
+
+/* -------------------------------------------------------------------------
+   9. CTA BUTTONS
+   ------------------------------------------------------------------------- */
+.cta-button {
+  appearance: none;
+  background: transparent;
+  border: var(--border-cta);
+  color: var(--accent-amber);
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px var(--space-4);
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 100%;
+  box-shadow: var(--glow-cta);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none; /* the keepsake save control is an <a>, not a <button> */
+  transition: transform var(--duration-instant) var(--easing-out),
+              background-color var(--duration-instant) var(--easing-out),
+              color var(--duration-instant) var(--easing-out),
+              opacity var(--duration-fast) var(--easing-standard);
+  animation: cta-pulse 2s var(--easing-standard) infinite;
+}
+body.lang-fa .cta-button { text-transform: none; font-size: var(--text-base); }
+
+@media (min-width: 768px) { .cta-button { width: auto; min-width: 260px; } }
+
+.cta-button:hover { background: rgba(217, 164, 65, 0.08); }
+@media (hover: hover) and (pointer: fine) {
+  .cta-button:hover { transform: translateY(-1px); }
+}
+.cta-button:active,
+.cta-button.is-pressed {
+  background: var(--accent-amber);
+  color: var(--bg-base);
+  transform: scale(0.97);
+}
+
+.cta-button:disabled,
+.cta-button[aria-disabled="true"] {
+  color: var(--accent-amber-dim);
+  border-color: var(--accent-amber-dim);
+  box-shadow: none;
+  cursor: not-allowed;
+  animation: none;
+  opacity: var(--opacity-disabled);
+}
+
+.cta-button--fill {
+  background: var(--accent-amber);
+  color: var(--bg-base);
+}
+.cta-button--fill:hover { background: #e5b358; }
+
+.cta-button--warm {
+  border: 1px solid var(--warm-accent);
+  color: var(--warm-accent);
+  animation: none;
+  box-shadow: none;
+}
+.cta-button--warm:active,
+.cta-button--warm.is-pressed {
+  background: var(--warm-accent);
+  color: var(--warm-bg);
+}
+.cta-button--warm.is-kept {
+  background: var(--warm-accent);
+  color: var(--warm-bg);
+  cursor: default;
+  animation: none;
+}
+
+.cta-button--ghost {
+  border-color: transparent;
+  box-shadow: none;
+  animation: none;
+  color: var(--text-secondary);
+  width: auto;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+}
+.cta-button--ghost:hover { color: var(--text-primary); background: transparent; }
+
+/* -------------------------------------------------------------------------
+   10. STATUS INDICATORS / CLASSIFIED-DECLASSIFIED LABELS
+   ------------------------------------------------------------------------- */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-green);
+}
+body.lang-fa .status-indicator { text-transform: none; }
+.status-indicator__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 6px rgba(63, 203, 140, 0.6);
+}
+
+.classified-label {
+  display: inline-block;
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px var(--space-2);
+  border: 2px solid var(--locked-neutral);
+  color: var(--locked-neutral);
+  border-radius: var(--radius-sm);
+  transform: rotate(-2deg);
+  transition: color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+.classified-label.is-declassified {
+  color: var(--status-green);
+  border-color: var(--status-green);
+  transform: rotate(1deg);
+}
+
+/* -------------------------------------------------------------------------
+   11. ACT II — SURVIVOR IDENTIFICATION PANEL
+   The photo is a featured, physically "embedded" card element now — not a
+   faint background wash. Stacks on mobile, sits beside the data on wider
+   screens. Depth via layered shadows + a restrained resting/hover tilt.
+   ------------------------------------------------------------------------- */
+.dossier {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  padding: var(--space-3);
+  text-align: start;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 10px 18px -10px rgba(0, 0, 0, 0.55),
+    0 26px 44px -20px rgba(0, 0, 0, 0.65);
+  transform: perspective(900px) rotateX(0.4deg);
+  transition: transform var(--duration-medium) var(--easing-out),
+              box-shadow var(--duration-medium) var(--easing-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .dossier:hover {
+    transform: perspective(900px) rotateX(1.2deg) translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 14px 22px -10px rgba(0, 0, 0, 0.6),
+      0 34px 56px -20px rgba(0, 0, 0, 0.7);
+  }
+}
+@media (min-width: 768px) {
+  .dossier { flex-direction: row; align-items: stretch; padding: var(--space-4); }
+}
+
+.dossier__photo-frame {
+  position: relative;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(217, 164, 65, 0.28);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 14px 26px -12px rgba(0, 0, 0, 0.75);
+  background: #000;
+}
+/* side-by-side: centered portrait crop of the landscape source keeps both
+   faces (they sit at ~40% and ~62% of the frame width) */
+@media (min-width: 768px) {
+  .dossier__photo-frame { flex: 0 0 42%; aspect-ratio: 4 / 5; }
+}
+
+.dossier__keyart {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  filter: grayscale(0.4) contrast(1.06) saturate(0.85) brightness(0.62) blur(6px);
+  transition: filter var(--duration-slow) var(--easing-standard);
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.dossier__keyart.is-focused {
+  filter: grayscale(0.22) contrast(1.05) saturate(0.92) brightness(0.88) blur(0px);
+}
+
+/* thin classified-feel scanlines over the photo — restrained, never hides
+   the two people, per the "clearly recognizable" requirement */
+.dossier__photo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.16) 0px,
+      rgba(0, 0, 0, 0.16) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 45%);
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+}
+.dossier__photo-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.55);
+}
+
+.dossier__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.dossier__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.dossier__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dossier__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-hairline);
+  position: relative;
+  overflow: hidden;
+}
+.dossier__row:last-child { border-bottom: none; }
+
+.dossier__label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+body.lang-fa .dossier__label { text-transform: none; }
+
+.dossier__value {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dossier__row.is-redacted .dossier__value {
+  color: transparent;
+  position: relative;
+}
+.dossier__row.is-redacted .dossier__value::before {
+  content: "";
+  position: absolute;
+  inset: 2px 0;
+  background: var(--locked-neutral);
+  opacity: 0.5;
+}
+
+.dossier__row .scan-line {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background: var(--status-green);
+  box-shadow: 0 0 8px rgba(63, 203, 140, 0.8);
+  transform: translateY(-4px);
+  opacity: 0;
+}
+.dossier__row.is-scanning .scan-line {
+  animation: scan-sweep var(--duration-medium) var(--easing-standard) forwards;
+}
+
+/* -------------------------------------------------------------------------
+   12. ACT III — ARCHIVE INDEX LIST
+   ------------------------------------------------------------------------- */
+.archive-list {
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.archive-item {
+  width: 100%;
+}
+
+.archive-item__button {
+  appearance: none;
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: transparent;
+  border: var(--border-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-system);
+  font-size: var(--text-base);
+  cursor: pointer;
+  text-align: start;
+  opacity: 0;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+  transform: translateY(6px);
+  animation: card-in var(--duration-instant) var(--easing-out) forwards;
+  animation-delay: var(--stagger-delay, 0ms);
+  transition: background-color var(--duration-instant) var(--easing-out),
+              border-color var(--duration-instant) var(--easing-out),
+              transform var(--duration-instant) var(--easing-out),
+              box-shadow var(--duration-instant) var(--easing-out);
+}
+.no-anim .archive-item__button,
+.archive-item__button.is-instant { opacity: 1; transform: none; animation: none; }
+
+.archive-item__button:hover,
+.archive-item__button.is-pressed {
+  background: var(--bg-elevated);
+  border-color: rgba(232, 234, 236, 0.24);
+}
+@media (hover: hover) and (pointer: fine) {
+  .archive-item__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 16px -8px rgba(0, 0, 0, 0.55);
+  }
+}
+.archive-item__button:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+
+.archive-item__icon {
+  flex: none;
+  width: 20px; height: 20px;
+  color: var(--status-green);
+}
+
+.archive-item__name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.archive-item__status {
+  flex: none;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--status-green);
+}
+body.lang-fa .archive-item__status { text-transform: none; }
+
+.archive-item--locked .archive-item__button {
+  opacity: 0.7;
+  cursor: default;
+}
+.no-anim .archive-item--locked .archive-item__button { opacity: 0.7; }
+.archive-item--locked .archive-item__icon { color: var(--locked-neutral); }
+.archive-item--locked.is-unlockable .archive-item__button { cursor: pointer; opacity: 1; }
+
+.archive-item__button.is-glitching {
+  animation: declass-glitch 180ms var(--easing-glitch);
+}
+
+/* hidden infected-body easter egg — a dead infected lies at the foot of the
+   archive. It's muted and sits below all the controls (secondary), but it is a
+   real, legible body at a real size — noticeable to anyone who looks around.
+   Lives in normal flow inside the frame: it can't overlap a control and it
+   scrolls with the scene on short screens. Optional; never blocks progression. */
+.act3-ground {
+  position: relative;
+  width: 100%;
+  height: 84px;
+  margin-top: -6px;
+  flex: none;
+  overflow: hidden; /* the rise-and-flee exit stays safely contained in this strip */
+}
+.act3-ground::before {  /* faint cold floor light so the body reads as lying *in* the scene */
+  content: "";
+  position: absolute;
+  inset: 8px -10px -6px -10px;
+  background: radial-gradient(closest-side at 32% 72%, rgba(120, 140, 130, 0.12), transparent);
+  pointer-events: none;
+}
+.infected-egg {
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: 170px;
+  max-width: 62%;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #6b756e;
+  opacity: 0.86;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.6)) saturate(0.85);
+  transition: opacity var(--duration-fast) var(--easing-standard),
+              filter var(--duration-fast) var(--easing-standard);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.infected-egg:hover,
+.infected-egg:focus-visible {
+  opacity: 1;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 10px rgba(156, 59, 59, 0.4)) saturate(1);
+}
+.infected-egg__art { width: 100%; height: auto; display: block; transform-origin: 30% 90%; overflow: visible; }
+.egg-hand { transform-box: fill-box; transform-origin: 100% 50%; }
+.infected-egg.is-twitching .infected-egg__art { animation: egg-jolt 340ms ease-out 1; }
+.infected-egg.is-twitching .egg-hand { animation: egg-hand-twitch 340ms ease-out 1; }
+
+/* the surprise: it wasn't dead — a sudden wake, rise, and flee off the edge
+   of the scene. Contained by .act3-ground's overflow:hidden above. */
+.infected-egg.is-rising .infected-egg__art {
+  transform-origin: 78% 85%;
+  animation: egg-rise 950ms cubic-bezier(.3, .7, .4, 1) 1 forwards;
+}
+.infected-egg.is-rising .egg-hand { animation: egg-hand-rise 420ms ease-out 1; }
+.infected-egg.is-gone-forever { opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
+@media (min-width: 1024px) { .infected-egg { width: 210px; } .act3-ground { height: 100px; } }
+
+/* -------------------------------------------------------------------------
+   13. ACT IV — INCIDENT DETAIL VIEW
+   ------------------------------------------------------------------------- */
+.incident-view {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-3) var(--space-5);
+  overflow-x: hidden;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+/* author `display:flex` above would otherwise beat the UA [hidden] rule */
+.incident-view[hidden] { display: none; }
+.incident-view.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.incident-view.theme-cold-blue {
+  background: linear-gradient(to bottom, #10161c, var(--bg-base) 70%);
+}
+
+.incident-view__back {
+  align-self: flex-start;
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+}
+body.lang-fa .incident-view__back { text-transform: none; }
+.incident-view__back:hover { color: var(--text-primary); }
+
+.incident-view__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  max-width: 420px;
+  margin: auto;
+  width: 100%;
+  padding: var(--space-5) var(--space-4);
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.025), transparent 40%), var(--bg-elevated);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 20px -12px rgba(0, 0, 0, 0.6),
+    0 30px 50px -24px rgba(0, 0, 0, 0.7);
+}
+@media (max-height: 500px) {
+  .incident-view { padding-top: var(--space-5); padding-bottom: var(--space-3); }
+  .incident-view__body { gap: var(--space-2); padding: var(--space-3) var(--space-4); }
+  .incident-view__icon { width: 28px; height: 28px; }
+}
+
+.incident-view__icon {
+  width: 40px; height: 40px;
+  color: var(--text-secondary);
+}
+.incident-view.theme-cold-blue .incident-view__icon { color: var(--tochal-blue); }
+
+.incident-view__footer {
+  align-self: center;
+  margin-top: var(--space-4);
+}
+
+/* -------------------------------------------------------------------------
+   14. ACT V — PROGRESS INDICATOR
+   ------------------------------------------------------------------------- */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+.progress-bar__fill {
+  height: 100%;
+  width: 0%;
+  background: var(--status-green);
+  transition: width 2.4s linear;
+}
+.progress-bar__fill.is-complete {
+  animation: fill-pulse var(--duration-medium) var(--easing-standard) 1;
+}
+
+.mission-line {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.mission-line strong { color: var(--text-primary); font-weight: 700; }
+
+.mission-line--backup {
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--easing-standard);
+}
+.mission-line--backup.is-visible { opacity: 1; }
+.mission-line--backup .status-value { color: var(--status-green); }
+
+/* -------------------------------------------------------------------------
+   15. ACT VI — SUPPLY DROP CRATE (enhanced: perspective hinge, volumetric
+   glow, subtle plank texture — still pure CSS, no images/particles)
+   ------------------------------------------------------------------------- */
+.crate__stage {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  padding-top: 44px; /* headroom so the standing infected sits above the crate line */
+  margin-bottom: 40px; /* ground under the crate where the fallen infected lies */
+  perspective: 640px;
+  perspective-origin: 50% 30%;
+}
+
+/* soft contact shadow — sells the crate as an object resting on the ground */
+.crate__shadow {
+  position: absolute;
+  left: 6%; right: 6%; bottom: -14px;
+  height: 26px;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.75), transparent 70%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.crate__glow {
+  position: absolute;
+  inset: -20% -30% -30%;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 55%, rgba(217, 164, 65, 0.34), transparent 62%);
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--easing-standard);
+  pointer-events: none;
+}
+.crate__stage.is-open .crate__glow { opacity: 1; }
+/* once the way is clear, the crate takes a faint rim of light */
+.crate__stage.is-clear:not(.is-open) .crate__glow { opacity: 0.35; }
+
+.crate {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 0.62;
+  z-index: 1;
+  transform-style: preserve-3d;
+  filter: brightness(0.62) saturate(0.85);
+  transition: filter var(--duration-slow) var(--easing-standard);
+}
+.crate__stage.is-clear .crate,
+.crate__stage.is-open .crate { filter: none; }
+
+.crate__half {
+  position: absolute;
+  left: 0; right: 0;
+  height: 50%;
+  border: 2px solid #7d858a;
+  background:
+    /* metal straps near each side */
+    linear-gradient(90deg, transparent 8%, rgba(0,0,0,0.38) 8%, rgba(0,0,0,0.38) 15%, transparent 15%,
+                            transparent 85%, rgba(0,0,0,0.38) 85%, rgba(0,0,0,0.38) 92%, transparent 92%),
+    /* plank grain */
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.028) 0px, rgba(255,255,255,0.028) 2px, transparent 2px, transparent 16px),
+    /* top-lit surface */
+    linear-gradient(to bottom, #232a2b, #151a1b);
+  box-shadow: inset 0 0 26px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: transform 0.7s cubic-bezier(.2,.8,.2,1),
+              opacity var(--duration-medium) var(--easing-out);
+  backface-visibility: hidden;
+}
+.crate__half::after {
+  /* rivets */
+  content: "";
+  position: absolute;
+  inset: 8px;
+  background:
+    radial-gradient(circle, rgba(200,205,208,0.35) 1.4px, transparent 2px) 0 0 / 100% 100%;
+  opacity: 0;
+}
+.crate__half--top {
+  top: 0;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transform-origin: 50% 0%;   /* hinged along the back edge of the lid */
+  z-index: 3;
+}
+.crate__half--bottom {
+  bottom: 0;
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  transform-origin: 50% 100%;
+  z-index: 2;
+}
+
+/* cavity light + a rising beam: only visible once the halves part */
+.crate__inner {
+  position: absolute;
+  left: 12%; right: 12%; top: 34%; height: 32%;
+  z-index: 1;
+  background: radial-gradient(ellipse at 50% 85%, #ffe3a6, #d9982f 50%, #6a4212 100%);
+  box-shadow: 0 0 36px 8px rgba(240, 190, 90, 0.5);
+  opacity: 0;
+  transition: opacity 0.5s ease-out 0.1s;
+}
+.crate__rays {
+  position: absolute;
+  left: 18%; right: 18%; bottom: 50%; height: 108%;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(240, 196, 110, 0.5), rgba(240, 196, 110, 0) 85%);
+  clip-path: polygon(22% 100%, 78% 100%, 100% 0, 0 0);
+  filter: blur(2px);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  transform: scaleY(0.4);
+  transition: opacity 0.6s ease-out 0.15s, transform 0.8s cubic-bezier(.2,.8,.2,1) 0.1s;
+  pointer-events: none;
+}
+
+.crate.is-open .crate__half--top { transform: translateY(-22%) rotateX(-58deg); }
+.crate.is-open .crate__half--bottom { transform: translateY(10%) rotateX(9deg); }
+.crate.is-open .crate__inner { opacity: 1; }
+.crate.is-open .crate__rays { opacity: 1; transform: scaleY(1); }
+
+.crate__seam {
+  position: absolute;
+  left: 10%; right: 10%; top: 50%;
+  height: 1px;
+  background: var(--text-secondary);
+  opacity: 0.5;
+  transform: translateY(-0.5px);
+  z-index: 4;
+  transition: opacity 0.3s;
+}
+.crate.is-open .crate__seam { opacity: 0; }
+
+.crate__flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(217, 164, 65, 0.35), transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: var(--z-modal);
+}
+.crate__flash.is-flashing { animation: flash-pop var(--duration-medium) var(--easing-out); }
+
+/* ---- ACT VI encounter: an original infected blocks the crate ---- */
+.foe {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.foe__btn {
+  position: relative;
+  pointer-events: auto;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  height: 100%;
+  aspect-ratio: 1 / 2;
+  min-width: 56px;
+  cursor: crosshair;
+  touch-action: manipulation;          /* rapid taps must never trigger double-tap zoom */
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: -6px;
+}
+.foe__btn:focus-visible { outline-offset: 4px; }
+.foe__pose,
+.foe__body { display: block; width: 100%; height: 100%; transform-origin: 50% 100%; }
+.foe__body svg { width: 100%; height: 100%; display: block; overflow: visible;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6)) brightness(0.78) saturate(0.85); }
+
+/* posture worsens with each hit (--slump is set from JS) */
+.foe__pose {
+  transform: rotate(calc(var(--slump, 0) * -1.6deg)) translateY(calc(var(--slump, 0) * 2px));
+  transition: transform 0.25s ease-out;
+}
+.foe__body { animation: foe-sway 3.4s ease-in-out infinite alternate; }
+.foe.is-hit .foe__body { animation: foe-recoil 260ms ease-out 1; }
+.foe.is-hit .foe__body svg { filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6)) brightness(1.3) saturate(0.7); }
+
+.foe__hitflash {
+  position: absolute;
+  left: 20%; top: 16%; width: 60%; height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 224, 170, 0.6), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+.foe.is-hit .foe__hitflash { animation: foe-hitflash 220ms ease-out 1; }
+
+/* collapse: pivots at the feet and lies down beside the crate, inside the stage bounds */
+.foe.is-down { z-index: 3; }
+.foe.is-down .foe__btn { pointer-events: none; }
+.foe.is-down .foe__body { animation: none; }
+.foe.is-down .foe__pose { animation: foe-collapse 950ms cubic-bezier(.5,0,.85,.6) forwards; }
+.foe.is-down .foe__body svg { filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6)) brightness(0.55) saturate(0.8); transition: filter 0.6s; }
+
+.reticle {
+  position: absolute;
+  left: 0; top: 0;
+  width: 56px; height: 56px;
+  margin: -28px 0 0 -28px;
+  color: var(--accent-amber);
+  filter: drop-shadow(0 0 5px rgba(217, 164, 65, 0.6));
+  opacity: 0;
+  transform: scale(1.5);
+  transition: opacity 0.14s ease-out, transform 0.18s ease-out;
+  pointer-events: none;
+  z-index: 5;
+}
+.reticle svg { width: 100%; height: 100%; display: block; }
+.reticle.is-visible { opacity: 0.95; transform: scale(1); }
+.reticle.is-lock { animation: reticle-lock 300ms ease-out 1; }
+
+.dust {
+  position: absolute;
+  left: 30%; bottom: 0;
+  width: 44%; height: 26%;
+  z-index: 4;
+  background: radial-gradient(ellipse at 50% 60%, rgba(150, 156, 150, 0.5), transparent 70%);
+  filter: blur(3px);
+  opacity: 0;
+  transform: scale(0.5);
+  pointer-events: none;
+}
+.dust.is-puffing { animation: dust-puff 900ms ease-out 1; }
+
+.act6-status {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  transition: opacity var(--duration-medium) var(--easing-standard);
+}
+.act6-status.is-hidden { opacity: 0; pointer-events: none; }
+.act6-status p { margin: 0; text-align: center; }
+.pips { display: flex; gap: 5px; }
+.pips i {
+  width: 22px; height: 4px;
+  background: #b0524a;
+  box-shadow: 0 0 6px rgba(176, 82, 74, 0.45);
+  border-radius: 1px;
+  transition: opacity 0.25s, transform 0.25s, background-color 0.25s;
+}
+.pips i.is-spent { opacity: 0.18; transform: scaleY(0.6); box-shadow: none; background: #555; }
+.crate__stage.is-clear ~ .act6-status .pips { opacity: 0.5; }
+
+/* compact landscape phones: keep the whole scene reachable and unclipped */
+@media (orientation: landscape) and (max-height: 500px) {
+  .crate__stage { max-width: 200px; padding-top: 30px; margin-bottom: 36px; }
+  .act6-status { min-height: 32px; }
+}
+
+.supply-reveal {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--duration-medium) var(--easing-standard),
+              transform var(--duration-medium) var(--easing-standard);
+}
+.supply-reveal.is-visible { opacity: 1; transform: none; }
+
+.supply-reveal__contents-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+body.lang-fa .supply-reveal__contents-label { text-transform: none; }
+.supply-reveal__title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent-amber);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  font-family: var(--font-system); /* product name always stays Latin/system-styled */
+}
+@media (min-width: 768px) { .supply-reveal__title { font-size: 40px; } }
+
+.supply-reveal__meta {
+  margin-top: var(--space-2);
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--easing-standard);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.supply-reveal__meta.is-visible { opacity: 1; }
+
+/* silhouette easter egg — small, dim, corner-anchored, tappable */
+.silhouette-egg {
+  position: absolute;
+  bottom: -6px;
+  inset-inline-end: 0;
+  width: 44px;
+  min-height: 44px;
+  opacity: 0.22;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+  z-index: 6;
+}
+.silhouette-egg:hover,
+.silhouette-egg:focus-visible { opacity: 0.5; }
+.silhouette-egg svg { width: 100%; height: auto; display: block; }
+
+/* -------------------------------------------------------------------------
+   16. ACT VII — FINAL TRANSMISSION (warm theme)
+   ------------------------------------------------------------------------- */
+.act--warm {
+  background: var(--warm-bg);
+  overflow-x: hidden;
+  overflow-y: auto; /* scroll intentionally allowed here, §5/§12 */
+  align-items: flex-start;
+  transition-duration: var(--duration-warm-transition);
+}
+.act--warm .act__frame {
+  max-width: 420px;
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-7);
+  gap: var(--space-5);
+  margin: auto;
+  min-height: calc(100dvh - var(--space-7) * 2);
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .act--warm .act__frame { max-width: 560px; }
+}
+
+.warm-heading {
+  font-family: var(--font-system);
+  font-size: var(--text-xl);
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+}
+.warm-heading .tw-char { color: var(--text-secondary); }
+
+.warm-signature {
+  font-family: var(--font-personal);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--text-2xl);
+  color: var(--warm-accent);
+}
+@media (min-width: 768px) { .warm-signature { font-size: var(--text-3xl); } }
+
+.warm-message {
+  font-family: var(--font-personal);
+  font-size: var(--text-lg);
+  line-height: 1.8;
+  color: var(--warm-text);
+  opacity: 0.85;
+  max-width: 34ch;
+  white-space: pre-line; /* the personal message is multi-paragraph; preserve its blank-line breaks */
+}
+@media (min-width: 1024px) { .warm-message { max-width: 60ch; } }
+
+/* -------------------------------------------------------------------------
+   16B. ACT VII — SURVIVOR'S KEEPSAKE (new)
+   ------------------------------------------------------------------------- */
+.keepsake {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--duration-slow) var(--easing-standard),
+              transform var(--duration-slow) var(--easing-standard);
+}
+.keepsake.is-visible { opacity: 1; transform: none; }
+
+.keepsake__title {
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warm-accent);
+  margin: 0;
+}
+body.lang-fa .keepsake__title { text-transform: none; letter-spacing: normal; }
+
+.keepsake__image {
+  width: 100%;
+  max-width: 320px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(224, 179, 125, 0.35);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+}
+
+.keepsake__caption {
+  font-family: var(--font-personal);
+  font-size: var(--text-base);
+  color: var(--warm-text);
+  opacity: 0.75;
+  text-align: center;
+  max-width: 34ch;
+  margin: 0;
+}
+
+.keepsake__save { margin-top: var(--space-2); }
+
+/* -------------------------------------------------------------------------
+   17. WARNING BANNER (real technical errors only, per §3/§13)
+   ------------------------------------------------------------------------- */
+.warning-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: var(--z-modal);
+  background: rgba(156, 59, 59, 0.16);
+  color: #E8A3A3;
+  border-bottom: 1px solid var(--warning-red);
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  transform: translateY(-100%);
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+.warning-banner.is-visible { transform: translateY(0); }
+
+/* -------------------------------------------------------------------------
+   17B. ACHIEVEMENT / DISCOVERY TOAST
+   ------------------------------------------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  transform: translate(-50%, 12px);
+  z-index: var(--z-toast);
+  width: min(88vw, 320px);
+  background: var(--bg-elevated);
+  border: var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+.toast[hidden] { display: none; }
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.toast__block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-hairline);
+}
+.toast__block:last-child { border-bottom: none; padding-bottom: 0; }
+.toast__eyebrow {
+  font-family: var(--font-system);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-green);
+  margin: 0;
+}
+.toast__eyebrow--amber { color: var(--accent-amber); }
+body.lang-fa .toast__eyebrow { text-transform: none; }
+.toast__body {
+  font-family: var(--font-system);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* -------------------------------------------------------------------------
+   18. KEYFRAMES
+   ------------------------------------------------------------------------- */
+@keyframes pulse-idle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(217, 164, 65, 0.25); }
+  50% { box-shadow: 0 0 18px rgba(217, 164, 65, 0.4); }
+}
+@keyframes tw-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes flicker-cut {
+  0% { opacity: 1; }
+  20% { opacity: 0; }
+  40% { opacity: 1; }
+  55% { opacity: 0; }
+  75% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes scan-sweep {
+  0% { opacity: 1; transform: translateY(-4px); }
+  100% { opacity: 0; transform: translateY(48px); }
+}
+@keyframes declass-glitch {
+  0% { transform: translate(0, 0); filter: none; }
+  33% { transform: translate(-2px, 1px); filter: hue-rotate(40deg); }
+  66% { transform: translate(2px, -1px); filter: hue-rotate(-40deg); }
+  100% { transform: translate(0, 0); filter: none; }
+}
+@keyframes fill-pulse {
+  0% { box-shadow: 0 0 0 rgba(63, 203, 140, 0); }
+  50% { box-shadow: 0 0 10px rgba(63, 203, 140, 0.6); }
+  100% { box-shadow: 0 0 0 rgba(63, 203, 140, 0); }
+}
+@keyframes flash-pop {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes atmosphere-drift {
+  0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  100% { background-position: 3% 4%, -3% -3%, 0% 2%; }
+}
+@keyframes foe-sway {
+  0% { transform: rotate(-1.4deg) translateX(-1px); }
+  100% { transform: rotate(1.6deg) translateX(1px); }
+}
+@keyframes foe-recoil {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  35% { transform: translate(4px, -3px) rotate(3.5deg) scale(0.985); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+@keyframes foe-hitflash {
+  0% { opacity: 0; transform: scale(0.6); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+@keyframes foe-collapse {
+  0%   { transform: rotate(calc(var(--slump, 0) * -1.6deg)) translateY(calc(var(--slump, 0) * 2px)); }
+  45%  { transform: translate(-8%, 2%) rotate(-38deg) scale(0.9); }
+  72%  { transform: translate(-14%, 3%) rotate(-90deg) scale(0.66); }
+  86%  { transform: translate(-15%, 2%) rotate(-84deg) scale(0.66); }
+  100% { transform: translate(-14%, 3%) rotate(-88deg) scale(0.64); }
+}
+@keyframes reticle-lock {
+  0% { transform: scale(1.5) rotate(0deg); }
+  60% { transform: scale(0.82) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
+}
+@keyframes dust-puff {
+  0% { opacity: 0.85; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(1.7) translateY(-6px); }
+}
+@keyframes egg-jolt {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  18%  { transform: translate(0, -5px) rotate(-2.5deg) scale(1.03); }
+  40%  { transform: translate(2px, 0) rotate(1.8deg); }
+  65%  { transform: translate(-1px, -2px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+@keyframes egg-hand-twitch {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-16deg); }
+  45%  { transform: rotate(9deg); }
+  70%  { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes egg-rise {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  8%   { transform: translate(-2px, -2px) rotate(-5deg) scale(1); }
+  16%  { transform: translate(2px, 0) rotate(4deg) scale(1); }
+  26%  { transform: translate(0, 0) rotate(-1deg) scale(1); }
+  50%  { transform: translate(-6px, -20px) rotate(-70deg) scale(0.92); }
+  64%  { transform: translate(-10px, -24px) rotate(-82deg) scale(0.88); }
+  100% { transform: translate(-70px, -10px) rotate(-96deg) scale(0.7); opacity: 0.05; }
+}
+@keyframes egg-hand-rise {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-30deg); }
+  45%  { transform: rotate(22deg); }
+  70%  { transform: rotate(-14deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes infected-twitch {
+  0% { transform: translate(0,0) rotate(0deg); }
+  20% { transform: translate(-2px,1px) rotate(-3deg); }
+  45% { transform: translate(2px,-1px) rotate(2deg); }
+  70% { transform: translate(-1px,0) rotate(-1deg); }
+  100% { transform: translate(0,0) rotate(0deg); }
+}
+
+/* -------------------------------------------------------------------------
+   19. RESPONSIVE — small phone tightening (§12)
+   ------------------------------------------------------------------------- */
+@media (max-width: 374px) {
+  .act { padding: var(--space-5) var(--space-2) var(--space-4); }
+  .heading { font-size: 18px; }
+}
+
+@media (max-height: 600px) {
+  .act { align-items: flex-start; padding-top: var(--space-7); }
+}
+
+/* -------------------------------------------------------------------------
+   19B. COMPACT LANDSCAPE PHONES (short viewport): tighten vertical rhythm so
+   the dossier, archive and supply-drop scenes fit without clipping. Anything
+   that still doesn't fit scrolls (each act is its own scroll container).
+   ------------------------------------------------------------------------- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .act { padding-top: 52px; padding-bottom: var(--space-3); align-items: flex-start; }
+  .act--warm { align-items: flex-start; }
+  .act__frame { gap: var(--space-2); }
+  .heading { font-size: 16px; }
+  .dossier { padding: var(--space-3); gap: var(--space-3); }
+  .dossier__rows { gap: var(--space-2); }
+  .dossier__row { padding-bottom: var(--space-1); }
+  .archive-list { gap: 6px; }
+  .archive-item__button { min-height: 48px; padding: var(--space-2) var(--space-3); }
+  .cta-button { padding-top: 10px; padding-bottom: 10px; }
+  .infected-egg { width: 120px; }
+  .act3-ground { height: 60px; }
+}
+
+/* ACT VI on a short landscape phone: crate on one side, status / reveal /
+   buttons on the other, so nothing needs scrolling to reach */
+@media (orientation: landscape) and (max-height: 500px) {
+  #act-6 .act__frame {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+    align-items: center;
+    justify-items: center;
+    max-width: 600px;
+  }
+  #act-6 .heading { grid-column: 1 / -1; }
+  #act-6 .crate__stage { grid-column: 1; grid-row: 2 / span 5; max-width: 210px; margin-bottom: 30px; }
+  #act-6 .act6-status,
+  #act-6 .supply-reveal,
+  #act-6 #act6-cta,
+  #act-6 #act6-continue { grid-column: 2; }
+  #act-6 .cta-button { width: 100%; min-width: 0; letter-spacing: 0.03em; padding-inline: 10px; font-size: 12px; }
+  .supply-reveal__title { font-size: 26px; }
+}
+
+/* collapsed once spent (status line + delivery button after the crate opens) */
+.is-gone { display: none !important; }
+
+/* -------------------------------------------------------------------------
+   20. REDUCED MOTION (§10)
+   ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .status-dot,
+  .cta-button { animation: none !important; }
+  .tw-char { opacity: 1 !important; }
+  #atmosphere { animation: none !important; transform: none !important; }
+}
